@@ -1,0 +1,36 @@
+# Source files
+src/
+tsconfig.json
+rollup.config.js
+
+# Development files
+.eslintrc.json
+.prettierrc
+jest.config.js
+.gitignore
+
+# Tests
+**/*.test.ts
+**/*.spec.ts
+__tests__/
+coverage/
+
+# Documentation
+*.md
+!README.md
+
+# Configuration files
+.env*
+.vscode/
+.idea/
+
+# Dependencies
+node_modules/
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
