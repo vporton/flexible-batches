@@ -8,12 +8,16 @@ import { Response } from 'openai/resources/responses';
 export interface FlexibleBatchStore {
   store(custom_id: string, batchId: string): void; // FIXME: Call it.
   getBatchIdByCustomId(custom_id: string): string | undefined;
+  // TODO: clearing the cache
 }
 
 export class FlexibleBatch {
   private files: { fileName: string; partIds: string[] }[] = [];
   private uploadId = 0;
-  private part = '';
+  private part: { jsonl: string; customIds: string[] } = {
+    jsonl: '',
+    customIds: [],
+  };
 
   /// I can't add items one-by-one what good design would require,
   /// because OpenAI misdesigned to provide total `bytes` field before uploading.
@@ -34,29 +38,35 @@ export class FlexibleBatch {
     private readonly store: FlexibleBatchStore,
     private readonly options?: RequestOptions
   ) {
-    this.newFile();
-
-    // I will upload ech file as one chunk of 1MB maximum and 50000 lines maximum.
+    // I will upload each file as one chunk of 1MB maximum and 50000 lines maximum.
     // This will fit into 200MB limit, 50000 lines limit for files and 64MB limit for parts.
-    let bytesInFile = 0;
     let linesInFile = 0;
     for (const item of bodies) {
       const line = JSON.stringify({ method: 'POST', ...item }) + '\n';
-      if (this.part.length + line.length > 1024 * 1024 || linesInFile > 50000) {
-        this.flushFile();
+      if (
+        this.part.jsonl.length + line.length > 1024 * 1024 ||
+        linesInFile > 50000
+      ) {
+        this.flushOnOverflow();
       }
-      this.part += line;
-      bytesInFile += line.length;
+      this.part.jsonl += line;
+      this.part.customIds.push(item.custom_id);
       ++linesInFile;
     }
   }
 
-  private async newFile() {
+  async flush() {
+    if (this.part.jsonl.length != 0) {
+      this.flushOnOverflow();
+    }
+  }
+
+  private async flushOnOverflow() {
     const fileName = randomUUID().toString() + '.jsonl';
 
     const upload = await this.client.uploads.create({
       purpose: 'batch',
-      bytes: this.part.length,
+      bytes: this.part.jsonl.length,
       filename: fileName,
       mime_type: 'application/jsonl',
     });
