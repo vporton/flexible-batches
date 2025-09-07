@@ -6,14 +6,12 @@ import { UploadCreateParams, Uploads } from 'openai/resources/index';
 import { Response } from 'openai/resources/responses';
 
 export interface FlexibleBatchStore {
-  store(custom_id: string, batchId: string): void; // FIXME: Call it.
+  getClearingId(): string; // TODO: Explain.
+  storeCustomIdBatchId(props: { custom_id: string; batchId: string }): void;
   getBatchIdByCustomId(custom_id: string): string | undefined;
-  // TODO: clearing the cache
 }
 
 export class FlexibleBatch {
-  private files: { fileName: string; partIds: string[] }[] = [];
-  private uploadId = 0;
   private part: { jsonl: string; customIds: string[] } = {
     jsonl: '',
     customIds: [],
@@ -23,8 +21,7 @@ export class FlexibleBatch {
   /// because OpenAI misdesigned to provide total `bytes` field before uploading.
   constructor(
     private readonly client: OpenAI,
-    // bodies: Iterable<UploadCreateParams>,
-    bodies: Iterable<{
+    private readonly bodies: Iterable<{
       custom_id: string;
       method?: string;
       url: string;
@@ -37,21 +34,22 @@ export class FlexibleBatch {
       | '/v1/completions',
     private readonly store: FlexibleBatchStore,
     private readonly options?: RequestOptions
-  ) {
+  ) {}
+
+  async run() {
     // I will upload each file as one chunk of 1MB maximum and 50000 lines maximum.
     // This will fit into 200MB limit, 50000 lines limit for files and 64MB limit for parts.
-    let linesInFile = 0;
-    for (const item of bodies) {
+    for (const item of this.bodies) {
       const line = JSON.stringify({ method: 'POST', ...item }) + '\n';
       if (
         this.part.jsonl.length + line.length > 1024 * 1024 ||
-        linesInFile > 50000
+        this.part.customIds.length > 50000
       ) {
-        this.flushOnOverflow();
+        await this.flushOnOverflow();
+        this.part = { jsonl: '', customIds: [] };
       }
       this.part.jsonl += line;
       this.part.customIds.push(item.custom_id);
-      ++linesInFile;
     }
   }
 
@@ -74,11 +72,10 @@ export class FlexibleBatch {
     await this.client.uploads.parts.create(
       fileName + '-0',
       {
-        data: await toFile(Buffer.from(this.part, 'utf-8'), fileName),
+        data: await toFile(Buffer.from(this.part.jsonl, 'utf-8'), fileName),
       },
       this.options
     );
-    // file.partIds.push(upload.id);
 
     // TODO: Need to check that file.partIds is not empty?
     await this.client.uploads.complete(fileName, {
@@ -89,13 +86,11 @@ export class FlexibleBatch {
       input_file_id: upload.id,
       completion_window: '24h',
       endpoint: this.endpoint,
-      // TODO
     });
 
-    // this.files.push({
-    //   fileName,
-    //   partIds: [upload.id], // one part per file
-    // });
+    for (const custom_id of this.part.customIds) {
+      this.store.storeCustomIdBatchId({ custom_id, batchId: batch.id });
+    }
   }
 
   async getResult(custom_id: string): Promise<Response | undefined> {
