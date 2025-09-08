@@ -1,6 +1,6 @@
 # Flexible Batches for OpeenAI
 
-This is an united API for OpenAI batch and non-batch mode.
+This is a united API for OpenAI batch and non-batch mode.
 
 **This software wasn't tested.**
 
