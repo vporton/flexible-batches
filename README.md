@@ -4,6 +4,8 @@ This is a united TypeScript API for OpenAI batch and non-batch mode. It also sup
 
 **This software wasn't tested.**
 
+I developed this software for faster debugging cycle of OpenAI batch processing, because normally batches take up to 24h.
+
 To add to your project, use
 ```
 npm i flexible-batches
