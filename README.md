@@ -1,6 +1,6 @@
-# Flexible Batches for OpeenAI
+# Flexible Batches for OpenAI
 
-This is a united API for OpenAI batch and non-batch mode.
+This is a united TypeScript API for OpenAI batch and non-batch mode. It also supports bigger logical batches than allowed by OpenAI.
 
 **This software wasn't tested.**
 
