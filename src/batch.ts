@@ -72,6 +72,8 @@ export class FlexibleOpenAIBatch implements FlexibleOpenAI {
     }
   }
 
+  async init(): Promise<void> {}
+
   getMaxChunkSize(): number {
     return this.flexOptions?.maxChunkSize ?? 1024 * 1024;
   }

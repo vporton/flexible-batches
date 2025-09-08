@@ -1,6 +1,8 @@
 import OpenAI from 'openai';
 
 export interface FlexibleOpenAI {
+  init(): Promise<void>;
+
   addItem(item: {
     custom_id: string;
     method?: string;

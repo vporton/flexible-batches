@@ -31,6 +31,8 @@ export class FlexibleOpenAINonBatch implements FlexibleOpenAI {
     private readonly requestOptions?: RequestOptions
   ) {}
 
+  async init() {}
+
   async addItem(item: {
     custom_id: string;
     method?: string;
