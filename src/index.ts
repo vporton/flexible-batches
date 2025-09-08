@@ -1,7 +1,6 @@
 import { randomUUID } from 'crypto';
 import { OpenAI, toFile } from 'openai';
 import { RequestOptions } from 'openai/internal/request-options';
-// import { Response } from 'openai/resources/responses';
 
 export interface FlexibleBatchStore {
   /// Get ID used by FlexibleBatchClearer to erase expired batches.
