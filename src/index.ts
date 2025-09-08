@@ -106,7 +106,7 @@ export class FlexibleBatch {
     }
   }
 
-  async getResult(custom_id: string): Promise<Response | undefined> {
+  async getOutput(custom_id: string): Promise<Response | undefined> {
     const batch = await this.client.batches.retrieve(
       this.store.getBatchIdByCustomId(custom_id)! // TODO: Cache it.
     );
@@ -114,5 +114,13 @@ export class FlexibleBatch {
       return undefined;
     }
     return await this.client.responses.retrieve(batch.output_file_id!);
+  }
+
+  async getOutputOrThrow(custom_id: string): Promise<Response> {
+    const result = await this.getOutput(custom_id);
+    if (!result) {
+      throw new Error(`Output not found for custom_id: ${custom_id}`);
+    }
+    return result;
   }
 }
