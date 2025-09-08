@@ -45,6 +45,14 @@ export class FlexibleBatch {
     }
   }
 
+  getMaxChunkSize(): number {
+    return this.flexOptions?.maxChunkSize ?? 1024 * 1024;
+  }
+
+  getMaxLines(): number {
+    return this.flexOptions?.maxLines ?? 50000;
+  }
+
   async addItem(item: {
     custom_id: string;
     method?: string;
@@ -54,10 +62,14 @@ export class FlexibleBatch {
     // I will upload each file as one chunk of 1MB maximum and 50000 lines maximum.
     // This will fit into 200MB limit, 50000 lines limit for files and 64MB limit for parts.
     const line = JSON.stringify({ method: 'POST', ...item }) + '\n';
+    if (line.length > this.getMaxChunkSize()) {
+      throw new Error(
+        `An AI request is too long. It must be less than ${this.getMaxChunkSize()} bytes.`
+      );
+    }
     if (
-      this.part.jsonl.length + line.length >
-        (this.flexOptions?.maxChunkSize ?? 1024 * 1024) ||
-      this.part.customIds.length > (this.flexOptions?.maxLines ?? 50000)
+      this.part.jsonl.length + line.length > this.getMaxChunkSize() ||
+      this.part.customIds.length > this.getMaxLines()
     ) {
       await this.flushOnOverflow();
       this.part = { jsonl: '', customIds: [] };
