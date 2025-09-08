@@ -17,17 +17,8 @@ export class FlexibleBatch {
     customIds: [],
   };
 
-  /// I can't add items one-by-one what good design would require,
-  /// because OpenAI misdesigned to provide total `bytes` field before uploading.
-  /// TODO: It seems to be workaroundable.
   constructor(
     private readonly client: OpenAI,
-    private readonly bodies: Iterable<{
-      custom_id: string;
-      method?: string;
-      url: string;
-      body: any;
-    }>,
     private readonly endpoint:
       | '/v1/responses'
       | '/v1/chat/completions'
@@ -37,21 +28,24 @@ export class FlexibleBatch {
     private readonly options?: RequestOptions
   ) {}
 
-  async run() {
+  async addItem(item: {
+    custom_id: string;
+    method?: string;
+    url: string;
+    body: any;
+  }) {
     // I will upload each file as one chunk of 1MB maximum and 50000 lines maximum.
     // This will fit into 200MB limit, 50000 lines limit for files and 64MB limit for parts.
-    for (const item of this.bodies) {
-      const line = JSON.stringify({ method: 'POST', ...item }) + '\n';
-      if (
-        this.part.jsonl.length + line.length > 1024 * 1024 ||
-        this.part.customIds.length > 50000
-      ) {
-        await this.flushOnOverflow();
-        this.part = { jsonl: '', customIds: [] };
-      }
-      this.part.jsonl += line;
-      this.part.customIds.push(item.custom_id);
+    const line = JSON.stringify({ method: 'POST', ...item }) + '\n';
+    if (
+      this.part.jsonl.length + line.length > 1024 * 1024 ||
+      this.part.customIds.length > 50000
+    ) {
+      await this.flushOnOverflow();
+      this.part = { jsonl: '', customIds: [] };
     }
+    this.part.jsonl += line;
+    this.part.customIds.push(item.custom_id);
   }
 
   async flush() {
