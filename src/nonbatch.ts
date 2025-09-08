@@ -1,11 +1,11 @@
 import OpenAI from 'openai';
-import { FlexibleOpenAI } from './base';
+import { FlexibleOpenAI, FlexibleOpenAIOutput } from './base';
 import { RequestOptions } from 'openai/internal/request-options';
 
 export interface FlexibleNonBatchStore {
   /// Get ID used by FlexibleBatchClearer to erase expired batches.
   /// This function is recommended to be called before `addItem`, to store the ID before any items are added.
-  getClearingId(): Promise<string>;
+  getStoreId(): Promise<string>;
   storeResponseByCustomId(props: {
     customId: string;
     response: OpenAI.Responses.Response;
@@ -16,7 +16,7 @@ export interface FlexibleNonBatchStore {
 }
 
 export interface FlexibleNonBatchClearer {
-  clear(clearingId: string): Promise<void>;
+  clear(storeId: string): Promise<void>;
 }
 
 export class FlexibleOpenAINonBatch implements FlexibleOpenAI {
@@ -51,6 +51,12 @@ export class FlexibleOpenAINonBatch implements FlexibleOpenAI {
   }
 
   async flush() {}
+}
+
+export class FlexibleOpenAINonBatchOutput implements FlexibleOpenAIOutput {
+  constructor(private readonly store: FlexibleNonBatchStore) {}
+
+  async init(): Promise<void> {}
 
   async getOutput(
     customId: string

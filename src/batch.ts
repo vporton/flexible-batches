@@ -2,12 +2,12 @@ import { randomUUID } from 'crypto';
 import { OpenAI, toFile } from 'openai';
 import { RequestOptions } from 'openai/internal/request-options';
 
-import { FlexibleOpenAI } from './base';
+import { FlexibleOpenAI, FlexibleOpenAIOutput } from './base';
 
 export interface FlexibleBatchStore {
   /// Get ID used by FlexibleBatchClearer to erase expired batches.
   /// This function is recommended to be called before `addItem`, to store the ID before any items are added.
-  getClearingId(): Promise<string>;
+  getStoreId(): Promise<string>;
   storeBatchIdByCustomId(props: {
     customId: string;
     batchId: string;
@@ -16,15 +16,15 @@ export interface FlexibleBatchStore {
 }
 
 export interface FlexibleBatchClearer {
-  clear(clearingId: string): Promise<void>;
+  clear(storeId: string): Promise<void>;
 }
 
 /// TODO: Restrict max cache size.
 export class FlexibleBatchStoreCache implements FlexibleBatchStore {
   private cache: Map<string, string | undefined> = new Map();
   constructor(private readonly store: FlexibleBatchStore) {}
-  getClearingId(): Promise<string> {
-    return this.store.getClearingId();
+  getStoreId(): Promise<string> {
+    return this.store.getStoreId();
   }
   async storeBatchIdByCustomId(props: {
     customId: string;
@@ -144,6 +144,15 @@ export class FlexibleOpenAIBatch implements FlexibleOpenAI {
       });
     }
   }
+}
+
+export class FlexibleOpenAIBatchOutput implements FlexibleOpenAIOutput {
+  constructor(
+    private readonly client: OpenAI,
+    private readonly store: FlexibleBatchStore
+  ) {}
+
+  async init(): Promise<void> {}
 
   async getOutput(
     customId: string

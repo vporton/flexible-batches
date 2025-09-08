@@ -10,6 +10,10 @@ export interface FlexibleOpenAI {
   }): Promise<void>;
 
   flush(): Promise<void>;
+}
+
+export interface FlexibleOpenAIOutput {
+  init(): Promise<void>;
 
   getOutput(customId: string): Promise<OpenAI.Responses.Response | undefined>;
 
