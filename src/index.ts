@@ -6,9 +6,15 @@ import { UploadCreateParams, Uploads } from 'openai/resources/index';
 import { Response } from 'openai/resources/responses';
 
 export interface FlexibleBatchStore {
-  getClearingId(): string; // TODO: Explain.
-  storeCustomIdBatchId(props: { custom_id: string; batchId: string }): void;
+  /// Get ID used by FlexibleBatchClearer to erase expired batches.
+  /// This function is recommended to be called before `addItem`, to store the ID before any items are added.
+  getClearingId(): string;
+  storeBatchIdByCustomId(props: { custom_id: string; batchId: string }): void;
   getBatchIdByCustomId(custom_id: string): string | undefined;
+}
+
+export interface FlexibleBatchClearer {
+  clear(clearingId: string): void;
 }
 
 export class FlexibleBatch {
@@ -96,7 +102,7 @@ export class FlexibleBatch {
     });
 
     for (const custom_id of this.part.customIds) {
-      this.store.storeCustomIdBatchId({ custom_id, batchId: batch.id });
+      this.store.storeBatchIdByCustomId({ custom_id, batchId: batch.id });
     }
   }
 
