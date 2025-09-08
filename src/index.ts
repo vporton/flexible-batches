@@ -19,7 +19,7 @@ export class FlexibleBatch {
 
   /// I can't add items one-by-one what good design would require,
   /// because OpenAI misdesigned to provide total `bytes` field before uploading.
-  // TODO: It seems to be workaroundable.
+  /// TODO: It seems to be workaroundable.
   constructor(
     private readonly client: OpenAI,
     private readonly bodies: Iterable<{
