@@ -1,9 +1,7 @@
 import { randomUUID } from 'crypto';
-import openai, { OpenAI, toFile } from 'openai';
+import { OpenAI, toFile } from 'openai';
 import { RequestOptions } from 'openai/internal/request-options';
-import { Batch, BatchCreateParams } from 'openai/resources/batches';
-import { UploadCreateParams, Uploads } from 'openai/resources/index';
-import { Response } from 'openai/resources/responses';
+// import { Response } from 'openai/resources/responses';
 
 export interface FlexibleBatchStore {
   /// Get ID used by FlexibleBatchClearer to erase expired batches.
@@ -118,9 +116,11 @@ export class FlexibleBatch {
     }
   }
 
-  async getOutput(custom_id: string): Promise<Response | undefined> {
+  async getOutput(
+    customId: string
+  ): Promise<OpenAI.Responses.Response | undefined> {
     const batch = await this.client.batches.retrieve(
-      this.store.getBatchIdByCustomId(custom_id)! // TODO: Cache it.
+      this.store.getBatchIdByCustomId(customId)! // TODO: Cache it.
     );
     if (batch.status !== 'completed') {
       return undefined;
@@ -128,10 +128,10 @@ export class FlexibleBatch {
     return await this.client.responses.retrieve(batch.output_file_id!);
   }
 
-  async getOutputOrThrow(custom_id: string): Promise<Response> {
-    const result = await this.getOutput(custom_id);
+  async getOutputOrThrow(customId: string): Promise<OpenAI.Responses.Response> {
+    const result = await this.getOutput(customId);
     if (!result) {
-      throw new Error(`Output not found for custom_id: ${custom_id}`);
+      throw new Error(`Output not found for custom_id: ${customId}`);
     }
     return result;
   }
