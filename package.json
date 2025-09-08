@@ -1,6 +1,6 @@
 {
   "name": "flexible-batches",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A united TypeScript API for OpenAI batch and non-batch mode (untested)",
   "type": "module",
   "main": "dist/index.js",
@@ -34,12 +34,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yourusername/flexible-batches.git"
+    "url": "git+https://github.com/vporton/flexible-batches.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/flexible-batches/issues"
+    "url": "https://github.com/vporton/flexible-batches/issues"
   },
-  "homepage": "https://github.com/yourusername/flexible-batches#readme",
+  "homepage": "https://github.com/vporton/flexible-batches#readme",
   "devDependencies": {
     "@rollup/plugin-typescript": "^11.1.5",
     "@types/jest": "^29.5.8",
