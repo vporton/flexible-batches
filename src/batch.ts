@@ -2,7 +2,22 @@ import { randomUUID } from 'crypto';
 import { OpenAI, toFile } from 'openai';
 import { RequestOptions } from 'openai/internal/request-options';
 
-import { FlexibleBatchStore, FlexibleOpenAI } from './types';
+import { FlexibleOpenAI } from './base';
+
+export interface FlexibleBatchStore {
+  /// Get ID used by FlexibleBatchClearer to erase expired batches.
+  /// This function is recommended to be called before `addItem`, to store the ID before any items are added.
+  getClearingId(): Promise<string>;
+  storeBatchIdByCustomId(props: {
+    customId: string;
+    batchId: string;
+  }): Promise<void>;
+  getBatchIdByCustomId(customId: string): Promise<string | undefined>;
+}
+
+export interface FlexibleBatchClearer {
+  clear(clearingId: string): void;
+}
 
 /// TODO: Restrict max cache size.
 export class FlexibleBatchStoreCache implements FlexibleBatchStore {
@@ -65,15 +80,10 @@ export class FlexibleOpenAIBatch implements FlexibleOpenAI {
     return this.flexOptions?.maxLines ?? 50000;
   }
 
-  async addItem(item: {
-    custom_id: string;
-    method?: string;
-    url: string;
-    body: any;
-  }) {
+  async addItem(item: { custom_id: string; method?: string; body: unknown }) {
     // I will upload each file as one chunk of 1MB maximum and 50000 lines maximum.
     // This will fit into 200MB limit, 50000 lines limit for files and 64MB limit for parts.
-    const line = JSON.stringify({ method: 'POST', ...item }) + '\n';
+    const line = JSON.stringify({ method: 'post', ...item }) + '\n';
     if (line.length > this.getMaxChunkSize()) {
       throw new Error(
         `An AI request is too long. It must be less than ${this.getMaxChunkSize()} bytes.`

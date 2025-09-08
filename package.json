@@ -1,7 +1,7 @@
 {
   "name": "flexible-batches",
-  "version": "1.0.0",
-  "description": "A TypeScript library for flexible batch processing",
+  "version": "0.0.1",
+  "description": "A united TypeScript API for OpenAI batch and non-batch mode (untested)",
   "type": "module",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
@@ -26,13 +26,11 @@
     "prepublishOnly": "npm run test && npm run lint && npm run build"
   },
   "keywords": [
-    "typescript",
+    "OpenAI",
     "batch",
-    "processing",
-    "utility",
-    "library"
+    "processing"
   ],
-  "author": "Your Name <your.email@example.com>",
+  "author": "Victor Porton <porton.victor@gmail.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
