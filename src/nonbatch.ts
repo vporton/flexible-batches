@@ -16,7 +16,7 @@ export interface FlexibleNonBatchStore {
 }
 
 export interface FlexibleNonBatchClearer {
-  clear(clearingId: string): void;
+  clear(clearingId: string): Promise<void>;
 }
 
 export class FlexibleOpenAINonBatch implements FlexibleOpenAI {

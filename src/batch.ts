@@ -16,7 +16,7 @@ export interface FlexibleBatchStore {
 }
 
 export interface FlexibleBatchClearer {
-  clear(clearingId: string): void;
+  clear(clearingId: string): Promise<void>;
 }
 
 /// TODO: Restrict max cache size.
