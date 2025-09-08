@@ -6,13 +6,41 @@ import { RequestOptions } from 'openai/internal/request-options';
 export interface FlexibleBatchStore {
   /// Get ID used by FlexibleBatchClearer to erase expired batches.
   /// This function is recommended to be called before `addItem`, to store the ID before any items are added.
-  getClearingId(): string;
-  storeBatchIdByCustomId(props: { custom_id: string; batchId: string }): void;
-  getBatchIdByCustomId(custom_id: string): string | undefined;
+  getClearingId(): Promise<string>;
+  storeBatchIdByCustomId(props: {
+    customId: string;
+    batchId: string;
+  }): Promise<void>;
+  getBatchIdByCustomId(customId: string): Promise<string | undefined>;
 }
 
 export interface FlexibleBatchClearer {
   clear(clearingId: string): void;
+}
+
+/// TODO: Restrict max cache size.
+export class FlexibleBatchStoreCache implements FlexibleBatchStore {
+  private cache: Map<string, string | undefined> = new Map();
+  constructor(private readonly store: FlexibleBatchStore) {}
+  getClearingId(): Promise<string> {
+    return this.store.getClearingId();
+  }
+  async storeBatchIdByCustomId(props: {
+    customId: string;
+    batchId: string;
+  }): Promise<void> {
+    await this.store.storeBatchIdByCustomId(props);
+    this.cache.set(props.customId, props.batchId);
+  }
+  async getBatchIdByCustomId(customId: string): Promise<string | undefined> {
+    const cached = this.cache.get(customId);
+    if (cached) {
+      return cached;
+    }
+    const value = await this.store.getBatchIdByCustomId(customId);
+    this.cache.set(customId, value);
+    return value;
+  }
 }
 
 export class FlexibleBatch {
@@ -112,7 +140,10 @@ export class FlexibleBatch {
     });
 
     for (const custom_id of this.part.customIds) {
-      this.store.storeBatchIdByCustomId({ custom_id, batchId: batch.id });
+      await this.store.storeBatchIdByCustomId({
+        customId: custom_id,
+        batchId: batch.id,
+      });
     }
   }
 
@@ -120,7 +151,7 @@ export class FlexibleBatch {
     customId: string
   ): Promise<OpenAI.Responses.Response | undefined> {
     const batch = await this.client.batches.retrieve(
-      this.store.getBatchIdByCustomId(customId)! // TODO: Cache it.
+      (await this.store.getBatchIdByCustomId(customId))!
     );
     if (batch.status !== 'completed') {
       return undefined;
