@@ -25,8 +25,19 @@ export class FlexibleBatch {
       | '/v1/embeddings'
       | '/v1/completions',
     private readonly store: FlexibleBatchStore,
-    private readonly options?: RequestOptions
-  ) {}
+    private readonly requestOptions?: RequestOptions,
+    private readonly flexOptions?: {
+      maxChunkSize?: number; // Increase it, if you need long prompts.
+      maxLines?: number; // Decreasing it facilitates flushing more often.
+    }
+  ) {
+    if (this.flexOptions?.maxChunkSize ?? 0 > 64 * 1024 * 1024) {
+      throw new Error('maxChunkSize must be less than 64MB');
+    }
+    if (this.flexOptions?.maxLines ?? 0 > 50000) {
+      throw new Error('maxLines must be less than 50000');
+    }
+  }
 
   async addItem(item: {
     custom_id: string;
@@ -38,8 +49,9 @@ export class FlexibleBatch {
     // This will fit into 200MB limit, 50000 lines limit for files and 64MB limit for parts.
     const line = JSON.stringify({ method: 'POST', ...item }) + '\n';
     if (
-      this.part.jsonl.length + line.length > 1024 * 1024 ||
-      this.part.customIds.length > 50000
+      this.part.jsonl.length + line.length >
+        (this.flexOptions?.maxChunkSize ?? 1024 * 1024) ||
+      this.part.customIds.length > (this.flexOptions?.maxLines ?? 50000)
     ) {
       await this.flushOnOverflow();
       this.part = { jsonl: '', customIds: [] };
@@ -69,7 +81,7 @@ export class FlexibleBatch {
       {
         data: await toFile(Buffer.from(this.part.jsonl, 'utf-8'), fileName),
       },
-      this.options
+      this.requestOptions
     );
 
     // TODO: Need to check that file.partIds is not empty?
