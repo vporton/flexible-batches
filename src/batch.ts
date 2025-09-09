@@ -2,9 +2,9 @@ import { randomUUID } from 'crypto';
 import { OpenAI, toFile } from 'openai';
 import { RequestOptions } from 'openai/internal/request-options';
 
-import { FlexibleOpenAI, FlexibleOpenAIOutput } from './base';
+import { FlexibleOpenAI, FlexibleOpenAIOutput, FlexibleStore } from './base';
 
-export interface FlexibleBatchStore {
+export interface FlexibleBatchStore extends FlexibleStore {
   /// Get ID used by FlexibleBatchClearer to erase expired batches.
   /// This function is recommended to be called before `addItem`, to store the ID before any items are added.
   getStoreId(): Promise<string>;
@@ -41,6 +41,9 @@ export class FlexibleBatchStoreCache implements FlexibleBatchStore {
     const value = await this.store.getBatchIdByCustomId(customId);
     this.cache.set(customId, value);
     return value;
+  }
+  async clear(): Promise<void> {
+    await this.store.clear();
   }
 }
 

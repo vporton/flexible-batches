@@ -1,5 +1,11 @@
 import OpenAI from 'openai';
 
+export interface FlexibleStore {
+  init(): Promise<void>;
+  /// Free database space used by the store.
+  clear(): Promise<void>;
+}
+
 export interface FlexibleOpenAI {
   init(): Promise<void>;
 
