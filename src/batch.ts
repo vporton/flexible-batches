@@ -23,6 +23,7 @@ export interface FlexibleBatchClearer {
 export class FlexibleBatchStoreCache implements FlexibleBatchStore {
   private cache: Map<string, string | undefined> = new Map();
   constructor(private readonly store: FlexibleBatchStore) {}
+  async init(): Promise<void> {}
   getStoreId(): Promise<string> {
     return this.store.getStoreId();
   }
