@@ -7,7 +7,7 @@ import { FlexibleOpenAI, FlexibleOpenAIOutput, FlexibleStore } from './base';
 export interface FlexibleBatchStore extends FlexibleStore {
   /// Get ID used by FlexibleBatchClearer to erase expired batches.
   /// This function is recommended to be called before `addItem`, to store the ID before any items are added.
-  getStoreId(): Promise<string>;
+  getStoreId(): string;
   storeBatchIdByCustomId(props: {
     customId: string;
     batchId: string;
@@ -24,7 +24,7 @@ export class FlexibleBatchStoreCache implements FlexibleBatchStore {
   private cache: Map<string, string | undefined> = new Map();
   constructor(private readonly store: FlexibleBatchStore) {}
   async init(): Promise<void> {}
-  getStoreId(): Promise<string> {
+  getStoreId(): string {
     return this.store.getStoreId();
   }
   async storeBatchIdByCustomId(props: {

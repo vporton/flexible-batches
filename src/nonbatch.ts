@@ -5,7 +5,7 @@ import { RequestOptions } from 'openai/internal/request-options';
 export interface FlexibleNonBatchStore extends FlexibleStore {
   /// Get ID used by FlexibleBatchClearer to erase expired batches.
   /// This function is recommended to be called before `addItem`, to store the ID before any items are added.
-  getStoreId(): Promise<string>;
+  getStoreId(): string;
   storeResponseByCustomId(props: {
     customId: string;
     response: OpenAI.Responses.Response;
