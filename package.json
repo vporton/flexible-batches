@@ -1,18 +1,25 @@
 {
   "name": "flexible-batches",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "A united TypeScript API for OpenAI batch and non-batch mode (untested)",
   "type": "module",
   "main": "dist/index.cjs",
-  "module": "dist/index.js",
+  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "files": [
     "dist",
     "README.md",
     "LICENSE"
   ],
   "scripts": {
-    "build": "rollup -c",
+    "build": "tsup",
     "build:watch": "rollup -c -w",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -54,6 +61,7 @@
     "rollup-plugin-dts": "^6.1.0",
     "ts-jest": "^29.1.1",
     "tslib": "^2.6.2",
+    "tsup": "^8.5.0",
     "typescript": "^5.2.2"
   },
   "engines": {

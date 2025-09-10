@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
 import { FlexibleOpenAI, FlexibleOpenAIOutput, FlexibleStore } from './base';
-import { RequestOptions } from 'openai/internal/request-options';
+// import { RequestOptions } from 'openai/internal/request-options';
 
 export interface FlexibleNonBatchStore extends FlexibleStore {
   /// Get ID used by FlexibleBatchClearer to erase expired batches.
@@ -24,7 +24,7 @@ export class FlexibleOpenAINonBatch implements FlexibleOpenAI {
       | '/v1/embeddings'
       | '/v1/completions',
     private readonly store: FlexibleNonBatchStore,
-    private readonly requestOptions?: RequestOptions
+    private readonly requestOptions?: any // RequestOptions
   ) {}
 
   async init() {}

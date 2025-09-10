@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto';
 import { OpenAI, toFile } from 'openai';
-import { RequestOptions } from 'openai/internal/request-options';
+// import { RequestOptions } from 'openai/internal/request-options';
 
 import { FlexibleOpenAI, FlexibleOpenAIOutput, FlexibleStore } from './base';
 
@@ -62,7 +62,7 @@ export class FlexibleOpenAIBatch implements FlexibleOpenAI {
       | '/v1/embeddings'
       | '/v1/completions',
     private readonly store: FlexibleBatchStore,
-    private readonly requestOptions?: RequestOptions,
+    private readonly requestOptions?: any, //RequestOptions,
     private readonly flexOptions?: {
       maxChunkSize?: number; // Increase it, if you need long prompts.
       maxLines?: number; // Decreasing it facilitates flushing more often.
