@@ -27,11 +27,24 @@ const config = [
   },
   // Type definitions
   {
-    input: 'dist/index.d.ts',
-    output: {
-      file: 'dist/index.d.ts',
-      format: 'es',
-    },
+    input: 'src/index.ts',
+    output: [
+      {
+        file: 'dist/index.js',
+        format: 'es',  // Change from 'cjs' to 'es'
+        sourcemap: true,
+      },
+      {
+        file: 'dist/index.cjs',  // Rename to .cjs for CommonJS
+        format: 'cjs',
+        sourcemap: true,
+      },
+      {
+        file: 'dist/index.esm.js',
+        format: 'es',
+        sourcemap: true,
+      },
+    ],
     plugins: [dts()],
   },
 ];

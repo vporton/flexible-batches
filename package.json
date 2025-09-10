@@ -1,17 +1,11 @@
 {
   "name": "flexible-batches",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "A united TypeScript API for OpenAI batch and non-batch mode (untested)",
-  "main": "dist/index.js",
-  "module": "dist/index.esm.js",
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
   "types": "dist/index.d.ts",
-  "exports": {
-    ".": {
-      "import": "./dist/index.esm.js",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    }
-  },
   "files": [
     "dist",
     "README.md",
