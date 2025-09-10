@@ -5,7 +5,6 @@ import { OpenAI, toFile } from 'openai';
 import { FlexibleOpenAI, FlexibleOpenAIOutput, FlexibleStore } from './base';
 
 export interface FlexibleBatchStore extends FlexibleStore {
-  /// Get ID used by FlexibleBatchClearer to erase expired batches.
   /// This function is recommended to be called before `addItem`, to store the ID before any items are added.
   getStoreId(): string;
   storeBatchIdByCustomId(props: {
@@ -13,10 +12,6 @@ export interface FlexibleBatchStore extends FlexibleStore {
     batchId: string;
   }): Promise<void>;
   getBatchIdByCustomId(customId: string): Promise<string | undefined>;
-}
-
-export interface FlexibleBatchClearer {
-  clear(storeId: string): Promise<void>;
 }
 
 /// TODO: Restrict max cache size.
@@ -48,6 +43,8 @@ export class FlexibleBatchStoreCache implements FlexibleBatchStore {
   }
 }
 
+/// Output of this implementation is to be repeatedly queried, it may  not available immediately after `flush`.
+/// It uses OpenAI's batch API, but is not limited to a certain size.
 export class FlexibleOpenAIBatch implements FlexibleOpenAI {
   private part: { jsonl: string; customIds: string[] } = {
     jsonl: '',
@@ -150,6 +147,8 @@ export class FlexibleOpenAIBatch implements FlexibleOpenAI {
   }
 }
 
+/// This output returns the result. It may be not immediately available after `flush`.
+/// So, requests should be repeated until the result is available.
 export class FlexibleOpenAIBatchOutput implements FlexibleOpenAIOutput {
   constructor(
     private readonly client: OpenAI,

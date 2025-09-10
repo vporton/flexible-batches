@@ -3,7 +3,6 @@ import { FlexibleOpenAI, FlexibleOpenAIOutput, FlexibleStore } from './base';
 // import { RequestOptions } from 'openai/internal/request-options';
 
 export interface FlexibleNonBatchStore extends FlexibleStore {
-  /// Get ID used by FlexibleBatchClearer to erase expired batches.
   /// This function is recommended to be called before `addItem`, to store the ID before any items are added.
   getStoreId(): string;
   storeResponseByCustomId(props: {
@@ -15,6 +14,7 @@ export interface FlexibleNonBatchStore extends FlexibleStore {
   ): Promise<OpenAI.Responses.Response | undefined>;
 }
 
+/// Output of this implementation is can be read immediately after `flush`.
 export class FlexibleOpenAINonBatch implements FlexibleOpenAI {
   constructor(
     private readonly client: OpenAI,
@@ -49,6 +49,7 @@ export class FlexibleOpenAINonBatch implements FlexibleOpenAI {
   async flush() {}
 }
 
+/// This output returns the result immediately after `flush`.
 export class FlexibleOpenAINonBatchOutput implements FlexibleOpenAIOutput {
   constructor(private readonly store: FlexibleNonBatchStore) {}
 
