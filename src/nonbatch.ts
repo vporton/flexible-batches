@@ -37,7 +37,7 @@ export class FlexibleOpenAINonBatch implements FlexibleOpenAI {
     const response = await this.client.post(this.endpoint, {
       ...this.requestOptions,
       method: 'post',
-      path: this.endpoint,
+      path: this.endpoint.replace(/^\/v1/, ''), // TODO: OpenAI's bug
       body: item.body,
     });
     this.store.storeResponseByCustomId({
