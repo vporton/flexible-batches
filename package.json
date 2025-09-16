@@ -1,6 +1,6 @@
 {
   "name": "flexible-batches",
-  "version": "0.3.6",
+  "version": "0.3.7",
   "description": "A united TypeScript API for OpenAI batch and non-batch mode (untested)",
   "type": "module",
   "main": "dist/index.cjs",
